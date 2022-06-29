@@ -237,3 +237,25 @@ func TestWaitGroup(t *testing.T) {
 	group.Wait()
 	fmt.Println("Complete")
 }
+
+func TestOnce(t *testing.T) {
+	//memastikan funcion hanya dieksekusi 1x
+	counter := 0
+	OnlyOnce := func() {
+		counter++
+	}
+
+	var once sync.Once
+	var group sync.WaitGroup
+
+	for i := 0; i < 100; i++ {
+		go func() {
+			group.Add(1)
+			once.Do(OnlyOnce)
+			group.Done()
+		}()
+	}
+
+	group.Wait()
+	fmt.Println(counter)
+}

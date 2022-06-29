@@ -36,12 +36,3 @@ func Transfer(u1 *UserBalance, u2 *UserBalance, amount int) {
 	u1.Unlock()
 	u2.Unlock()
 }
-
-func RunAsynchronous(group *sync.WaitGroup) {
-	defer group.Done()
-
-	group.Add(1)
-
-	fmt.Println("Hello")
-	time.Sleep(1 * time.Second)
-}

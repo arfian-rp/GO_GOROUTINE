@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"sync"
 	"time"
 )
 
@@ -26,4 +27,13 @@ func OnlyIn(channel chan<- string) {
 func OnlyOut(channel <-chan string) {
 	data := <-channel
 	fmt.Println(data)
+}
+
+func RunAsynchronous(group *sync.WaitGroup) {
+	defer group.Done()
+
+	group.Add(1)
+
+	fmt.Println("Hello")
+	time.Sleep(1 * time.Second)
 }
