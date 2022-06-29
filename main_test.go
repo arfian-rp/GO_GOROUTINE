@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go-goroutine/utils"
 	"strconv"
+	"sync"
 	"testing"
 	"time"
 )
@@ -86,4 +87,153 @@ func TestRangeChannel(t *testing.T) {
 		fmt.Println(data)
 	}
 
+}
+
+func TestSelectChannel(t *testing.T) {
+	//Dengan select channel, kita bisa memilih data tercepat dari beberapa channel, jika data datang secara bersamaan di beberapa channel, maka akan dipilih secara random
+
+	channel1 := make(chan string)
+	channel2 := make(chan string)
+
+	counter := 0
+
+	go func() {
+		time.Sleep(2 * time.Second)
+		channel1 <- "data1"
+	}()
+	go func() {
+		time.Sleep(1 * time.Second)
+		channel2 <- "data2"
+	}()
+
+	for {
+		select {
+		case data := <-channel1:
+			fmt.Println("data dari channel1:", data)
+			counter++
+		case data := <-channel2:
+			fmt.Println("data dari channel2:", data)
+			counter++
+		}
+
+		if counter == 2 {
+			break
+		}
+	}
+
+}
+
+func TestDefaultSelectChannel(t *testing.T) {
+	//Dengan select channel, kita bisa memilih data tercepat dari beberapa channel, jika data datang secara bersamaan di beberapa channel, maka akan dipilih secara random
+
+	channel1 := make(chan string)
+	channel2 := make(chan string)
+
+	counter := 0
+
+	go func() {
+		time.Sleep(2 * time.Second)
+		// channel1 <- "data1"
+	}()
+	go func() {
+		time.Sleep(1 * time.Second)
+		// channel2 <- "data2"
+	}()
+
+	for {
+		select {
+		case data := <-channel1:
+			fmt.Println("data dari channel1:", data)
+			counter++
+		case data := <-channel2:
+			fmt.Println("data dari channel2:", data)
+			counter++
+		default:
+			fmt.Println("menunggu data")
+			counter += 2
+		}
+
+		if counter == 2 {
+			break
+		}
+	}
+
+}
+
+func TestRaceCondition(t *testing.T) {
+	x := 0
+	for i := 1; i <= 1000; i++ {
+		go func() {
+			for j := 1; j <= 1000; j++ {
+				x += 1
+			}
+		}()
+	}
+	time.Sleep(5 * time.Second)
+	fmt.Println(x) //harusnya 1.000.000
+}
+
+func TestMutex(t *testing.T) {
+	/*
+		untuk mengatasi masalah tersebut di golang ada anmanya mutex.
+		mutex  =>  melakukan locking dan unlocking, dimana ketika kita melakukan locking terhadap mutex, maka tidak ada yang bisa melakukan locking lagi sampai kita melakukan unlock.
+	*/
+	x := 0
+	var mutex sync.Mutex
+	for i := 1; i <= 1000; i++ {
+		go func() {
+			for j := 1; j <= 1000; j++ {
+
+				mutex.Lock()
+				x += 1
+				mutex.Unlock()
+			}
+		}()
+	}
+	time.Sleep(5 * time.Second)
+	fmt.Println(x)
+}
+
+func TestRWMutex(t *testing.T) {
+	//RWMutex => Read Write Mutex
+	account := utils.BankAccount{}
+
+	for i := 1; i <= 50; i++ {
+		go func() {
+			for j := 1; j <= 50; j++ {
+				account.AddBalance(1)
+				fmt.Println(account.GetBalance())
+			}
+		}()
+	}
+
+	time.Sleep(5 * time.Second)
+	fmt.Println(account.GetBalance())
+}
+
+func TestSimulasiDeadLock(t *testing.T) {
+	u1 := utils.UserBalance{
+		Name: "Yudi",
+	}
+	u2 := utils.UserBalance{
+		Name: "Yuda",
+	}
+
+	go utils.Transfer(&u1, &u2, 1000)
+	go utils.Transfer(&u2, &u1, 1000)
+
+	time.Sleep(5 * time.Second)
+}
+
+func TestWaitGroup(t *testing.T) {
+	//Solusi DeadLock
+
+	group := &sync.WaitGroup{}
+
+	for i := 1; i <= 100; i++ {
+		go utils.RunAsynchronous(group)
+	}
+
+	group.Wait()
+	fmt.Println("Complete")
 }
