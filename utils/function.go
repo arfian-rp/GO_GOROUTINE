@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -36,4 +37,15 @@ func RunAsynchronous(group *sync.WaitGroup) {
 
 	fmt.Println("Hello")
 	time.Sleep(1 * time.Second)
+}
+
+func ShowInfoCPU() {
+	totalCpu := runtime.NumCPU()
+	fmt.Println("CPU:", totalCpu)
+
+	totalThread := runtime.GOMAXPROCS(-1)
+	fmt.Println("Thread", totalThread)
+
+	totalGoroutine := runtime.NumGoroutine()
+	fmt.Println("Goroutine", totalGoroutine)
 }

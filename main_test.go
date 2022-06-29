@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go-goroutine/utils"
+	"runtime"
 	"strconv"
 	"sync"
 	"testing"
@@ -258,4 +259,10 @@ func TestOnce(t *testing.T) {
 
 	group.Wait()
 	fmt.Println(counter)
+}
+
+func TestGOMAXPROCS(t *testing.T) {
+	utils.ShowInfoCPU()
+	runtime.GOMAXPROCS(20) //mengubah thread
+	utils.ShowInfoCPU()
 }
